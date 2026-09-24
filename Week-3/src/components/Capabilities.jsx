@@ -1,64 +1,74 @@
-import { motion } from 'framer-motion'
-import { Move3d, Waves, BookOpen, Gauge } from 'lucide-react'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { Box, Zap, BookOpen, Gauge } from 'lucide-react'
 
-const CAPS = [
+const caps = [
   {
-    icon: Move3d,
-    title: 'Interactive model',
-    body: 'A real 3D asset the visitor can rotate and inspect, driven by user input rather than a fixed camera path.',
+    Icon: Box,
+    title: 'Interactive Model',
+    desc: 'Full orbit, zoom, and inspect controls. Users explore every angle of a product or concept in real time.',
   },
   {
-    icon: Waves,
-    title: 'Motion system',
-    body: 'Entrance, scroll, and hover animations built on one consistent timing system so nothing feels arbitrary.',
+    Icon: Zap,
+    title: 'Motion System',
+    desc: 'Framer Motion drives entrance animations, scroll reveals, and micro-interactions with precise timing control.',
   },
   {
-    icon: BookOpen,
-    title: 'Product storytelling',
-    body: 'Layout and copy are sequenced to explain what the product does before asking for a click.',
+    Icon: BookOpen,
+    title: 'Product Storytelling',
+    desc: 'Combine 3D visuals with editorial typography to guide users through a narrative that converts.',
   },
   {
-    icon: Gauge,
-    title: 'Performance focus',
-    body: 'Capped pixel ratio, lazy-loaded geometry, and a light draw call budget keep the scene fast on mid-range phones.',
+    Icon: Gauge,
+    title: 'Performance Focus',
+    desc: 'Optimized DPR, lazy-loaded assets, and minimal draw calls keep frame rates high on any device.',
   },
 ]
 
 export default function Capabilities() {
-  return (
-    <section id="capabilities" className="py-24 md:py-32 border-t hairline">
-      <div className="container-edge">
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-[2rem] sm:text-[2.4rem] text-bone max-w-[20ch]"
-        >
-          What the system is built on
-        </motion.h2>
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
 
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {CAPS.map((cap, i) => {
-            const Icon = cap.icon
-            return (
-              <motion.div
-                key={cap.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.5, delay: i * 0.06 }}
-                whileHover={{ y: -3 }}
-                className="border-t-2 border-copper pt-5"
-              >
-                <Icon size={22} className="text-copper mb-4" strokeWidth={1.6} />
-                <h3 className="font-display text-[1.15rem] text-bone mb-2">{cap.title}</h3>
-                <p className="text-bone-dim text-[0.92rem] leading-relaxed">{cap.body}</p>
-              </motion.div>
-            )
-          })}
+  return (
+    <section id="capabilities" className="capabilities-section" aria-label="Capabilities">
+      <div className="container">
+        <motion.div
+          ref={ref}
+          className="section-header"
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <p className="section-label">Capabilities</p>
+          <h2 className="section-title">Built for real products</h2>
+        </motion.div>
+        <div className="capabilities-grid">
+          {caps.map((cap, i) => (
+            <CapCard key={cap.title} cap={cap} index={i} />
+          ))}
         </div>
       </div>
     </section>
+  )
+}
+
+function CapCard({ cap, index }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const { Icon } = cap
+
+  return (
+    <motion.div
+      ref={ref}
+      className="capability-card"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ y: -2 }}
+    >
+      <Icon className="cap-icon" aria-hidden="true" />
+      <h3 className="cap-title">{cap.title}</h3>
+      <p className="cap-desc">{cap.desc}</p>
+    </motion.div>
   )
 }

@@ -1,104 +1,94 @@
-import React, { useRef, useState, useEffect } from 'react'
+import { Component, useRef, useState } from 'react'
+import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useGLTF, Center } from '@react-three/drei'
 
 const MODEL_PATH = '/models/algoryx-community-robot.glb'
 
-/**
- * Loads the official Algoryx Community asset from MODEL_PATH.
- * If the file has not been placed yet, GltfModel throws (from useGLTF),
- * which the parent's <Suspense>/error boundary below catches and swaps
- * in FallbackModel — a clearly non-official procedural placeholder so
- * the internship deliverable never misrepresents itself as containing
- * the real Community asset.
- */
-function GltfModel({ float }) {
-  const { scene } = useGLTF(MODEL_PATH)
-  const ref = useRef()
-
-  useFrame((state) => {
-    if (!ref.current) return
-    if (float) {
-      ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.08
-    }
+// ─── Development fallback — NOT the official Algoryx Community asset ───────────
+function FallbackGeometry() {
+  const group = useRef()
+  useFrame((_, delta) => {
+    if (group.current) group.current.rotation.y += delta * 0.15
   })
-
   return (
-    <Center ref={ref}>
-      <primitive object={scene} scale={1.4} />
-    </Center>
-  )
-}
-
-function FallbackModel({ float }) {
-  const ref = useRef()
-
-  useFrame((state) => {
-    if (!ref.current) return
-    ref.current.rotation.y += 0.0025
-    if (float) {
-      ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.08
-    }
-  })
-
-  return (
-    <group ref={ref}>
-      <mesh castShadow position={[0, 0.4, 0]}>
-        <icosahedronGeometry args={[0.9, 1]} />
-        <meshStandardMaterial color="#c17a52" roughness={0.35} metalness={0.4} flatShading />
+    <group ref={group}>
+      <mesh position={[0, 0, 0]} castShadow>
+        <boxGeometry args={[0.7, 1.0, 0.4]} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0.8} />
       </mesh>
-      <mesh castShadow receiveShadow position={[0, -0.75, 0]}>
-        <cylinderGeometry args={[1.1, 1.25, 0.3, 6]} />
-        <meshStandardMaterial color="#1c1f24" roughness={0.6} metalness={0.2} />
+      <mesh position={[0, 0.85, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.45, 0.38]} />
+        <meshStandardMaterial color="#1e1e1e" roughness={0.2} metalness={0.9} />
+      </mesh>
+      <mesh position={[-0.12, 0.88, 0.2]}>
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshStandardMaterial color="#c8a96e" emissive="#c8a96e" emissiveIntensity={0.8} />
+      </mesh>
+      <mesh position={[0.12, 0.88, 0.2]}>
+        <sphereGeometry args={[0.06, 12, 12]} />
+        <meshStandardMaterial color="#c8a96e" emissive="#c8a96e" emissiveIntensity={0.8} />
+      </mesh>
+      <mesh position={[-0.55, 0.1, 0]} castShadow>
+        <boxGeometry args={[0.2, 0.75, 0.22]} />
+        <meshStandardMaterial color="#222222" roughness={0.4} metalness={0.7} />
+      </mesh>
+      <mesh position={[0.55, 0.1, 0]} castShadow>
+        <boxGeometry args={[0.2, 0.75, 0.22]} />
+        <meshStandardMaterial color="#222222" roughness={0.4} metalness={0.7} />
+      </mesh>
+      <mesh position={[-0.2, -0.85, 0]} castShadow>
+        <boxGeometry args={[0.25, 0.7, 0.28]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.7} />
+      </mesh>
+      <mesh position={[0.2, -0.85, 0]} castShadow>
+        <boxGeometry args={[0.25, 0.7, 0.28]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.1, 0.21]}>
+        <boxGeometry args={[0.35, 0.35, 0.02]} />
+        <meshStandardMaterial color="#c8a96e" roughness={0.1} metalness={1} emissive="#c8a96e" emissiveIntensity={0.15} />
       </mesh>
     </group>
   )
 }
 
-class ModelBoundary extends React.Component {
+// ─── Official Algoryx Community model loader ──────────────────────────────────
+function OfficialModel() {
+  const { scene } = useGLTF(MODEL_PATH)
+  const ref = useRef()
+  useFrame((_, delta) => {
+    if (ref.current) ref.current.rotation.y += delta * 0.12
+  })
+  return <primitive ref={ref} object={scene} scale={1.5} position={[0, -1, 0]} castShadow receiveShadow />
+}
+
+class ErrorBoundary extends Component {
   constructor(props) {
     super(props)
-    this.state = { failed: false }
+    this.state = { error: false }
   }
   static getDerivedStateFromError() {
-    return { failed: true }
+    return { error: true }
   }
-  componentDidCatch() {}
+  componentDidCatch() {
+    this.props.onError?.()
+  }
   render() {
-    if (this.state.failed) return this.props.fallback
+    if (this.state.error) return <FallbackGeometry />
     return this.props.children
   }
 }
 
-export default function CommunityModel({ float = true, onSourceChange }) {
-  const [assetMissing, setAssetMissing] = useState(false)
+export default function CommunityModel({ onFallback }) {
+  const [hasError, setHasError] = useState(false)
 
-  useEffect(() => {
-    let cancelled = false
-    fetch(MODEL_PATH, { method: 'HEAD' })
-      .then((res) => {
-        if (!cancelled && !res.ok) setAssetMissing(true)
-      })
-      .catch(() => {
-        if (!cancelled) setAssetMissing(true)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    onSourceChange?.(assetMissing ? 'placeholder' : 'community')
-  }, [assetMissing, onSourceChange])
-
-  if (assetMissing) {
-    return <FallbackModel float={float} />
-  }
+  if (hasError) return <FallbackGeometry />
 
   return (
-    <ModelBoundary fallback={<FallbackModel float={float} />}>
-      <GltfModel float={float} />
-    </ModelBoundary>
+    <ErrorBoundary onError={() => { setHasError(true); onFallback?.() }}>
+      <OfficialModel />
+    </ErrorBoundary>
   )
 }
 
+useGLTF.preload(MODEL_PATH)

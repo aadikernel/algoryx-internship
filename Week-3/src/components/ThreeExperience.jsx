@@ -1,67 +1,48 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import RobotScene from './3d/RobotScene.jsx'
+import { useRef, useState } from 'react'
+import { motion, useInView } from 'framer-motion'
+import RobotScene from './3d/RobotScene'
 
 export default function ThreeExperience() {
-  const [source, setSource] = useState('community')
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const [isFallback, setIsFallback] = useState(false)
 
   return (
-    <section id="three-d-experience" className="py-24 md:py-32 border-t hairline">
-      <div className="container-edge">
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-[2rem] sm:text-[2.4rem] text-bone max-w-[18ch]"
+    <section id="three-experience" className="three-section" aria-label="3D Experience">
+      <div className="container">
+        <motion.div
+          ref={ref}
+          className="section-header"
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
         >
-          Explore the model
-        </motion.h2>
-
-        <div className="mt-12 grid md:grid-cols-[1fr_320px] gap-8 items-stretch">
-          <div className="relative h-[380px] sm:h-[460px] md:h-[560px] rounded-2xl border hairline overflow-hidden bg-surface">
-            <RobotScene className="absolute inset-0" onSourceChange={setSource} />
-            <span className="absolute bottom-5 left-1/2 -translate-x-1/2 text-bone-dim text-[0.85rem] bg-ink/70 backdrop-blur px-4 py-1.5 rounded-full border hairline">
-              Drag to explore
-            </span>
-          </div>
-
-          <div className="flex flex-col justify-between">
-            <div>
-              <p className="text-bone-dim leading-relaxed text-[0.98rem]">
-                An interactive 3D asset integrated directly into the web experience, rendered live with
-                React Three Fiber and orbit controls.
-              </p>
-
-              <div
-                className={`mt-6 rounded-xl border p-4 text-[0.85rem] leading-relaxed ${
-                  source === 'community'
-                    ? 'border-copper/40 text-bone-dim'
-                    : 'border-copper text-bone-dim'
-                }`}
-              >
-                {source === 'community' ? (
-                  <>
-                    <span className="text-bone">Asset source:</span> Algoryx Community —{' '}
-                    <code className="text-copper">algoryx-community-robot.glb</code>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-copper">Development placeholder.</span> The official Algoryx
-                    Community asset has not been added yet. Add it at{' '}
-                    <code className="text-bone">public/models/algoryx-community-robot.glb</code> to
-                    replace this procedural stand-in.
-                  </>
-                )}
-              </div>
-            </div>
-
-            <p className="mt-8 text-bone-dim text-[0.85rem]">
-              Works on desktop and mobile. Rotation is limited on the vertical axis so the model
-              stays framed.
+          <p className="section-label">3D Experience</p>
+          <h2 className="section-title">Algoryx Community model</h2>
+          {isFallback && (
+            <p className="asset-notice">
+              ⚠ Development fallback active. Place the official Algoryx Community GLB at{' '}
+              <code>public/models/algoryx-community-robot.glb</code> to complete the Week 3 requirement.
+              Reference: <a href="https://www.algoryx.in/3d-assets/robot/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>algoryx.in/3d-assets/robot</a>
             </p>
+          )}
+        </motion.div>
+
+        <motion.div
+          className="three-canvas-wrap"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="three-info-panel" aria-hidden="true">
+            <p className="info-panel-label">Algoryx Community</p>
+            <p className="info-panel-title">Interactive Robot</p>
+            <p className="info-panel-sub">Drag to orbit · Scroll to zoom</p>
           </div>
-        </div>
+
+          <RobotScene onFallback={() => setIsFallback(true)} />
+          <span className="canvas-hint">Drag to explore</span>
+        </motion.div>
       </div>
     </section>
   )

@@ -1,48 +1,63 @@
 import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
 
-const ITEMS = [
+const items = [
   {
+    num: '01',
     title: 'Direct interaction',
-    body: 'Visitors move around the model themselves — dragging, tilting, and inspecting it from every angle — instead of scrolling past a static render.',
+    desc: 'Users engage with 3D models in real time — rotating, inspecting, and exploring every surface without leaving the page.',
   },
   {
+    num: '02',
     title: 'Real-time rendering',
-    body: 'Everything on screen is drawn live in the browser using WebGL, Three.js, and React Three Fiber — no pre-baked video, no image sequence.',
+    desc: 'WebGL-powered rendering delivers cinematic quality at 60fps, with physically-based materials and dynamic lighting.',
   },
   {
+    num: '03',
     title: 'Responsive by default',
-    body: 'The scene, lighting, and layout adapt to the device it runs on, from a widescreen monitor down to a single-hand phone.',
+    desc: 'Every scene adapts to the viewport — from large desktop monitors to compact mobile screens — without compromise.',
   },
 ]
 
-export default function Experience() {
-  return (
-    <section id="experience" className="py-24 md:py-32 border-t hairline">
-      <div className="container-edge">
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-[2rem] sm:text-[2.4rem] text-bone max-w-[20ch]"
-        >
-          A 3D experience, not a 3D picture
-        </motion.h2>
+function Item({ item, index }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
 
-        <div className="mt-14 grid md:grid-cols-3 gap-px bg-line rounded-2xl overflow-hidden border hairline">
-          {ITEMS.map((item, i) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="bg-ink p-8 md:p-9"
-            >
-              <h3 className="font-display text-[1.3rem] text-bone mb-3">{item.title}</h3>
-              <p className="text-bone-dim leading-relaxed text-[0.98rem]">{item.body}</p>
-            </motion.div>
-          ))}
+  return (
+    <motion.div
+      ref={ref}
+      className="experience-item"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.12, ease: 'easeOut' }}
+    >
+      <p className="exp-number">{item.num}</p>
+      <h3 className="exp-title">{item.title}</h3>
+      <p className="exp-desc">{item.desc}</p>
+    </motion.div>
+  )
+}
+
+export default function Experience() {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+
+  return (
+    <section id="experience" className="experience-section" aria-label="Experience">
+      <div className="container">
+        <motion.div
+          ref={ref}
+          className="section-header"
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <p className="section-label">Experience</p>
+          <h2 className="section-title">What makes it different</h2>
+        </motion.div>
+        <div className="experience-grid">
+          {items.map((item, i) => <Item key={item.num} item={item} index={i} />)}
         </div>
       </div>
     </section>

@@ -1,0 +1,21 @@
+ALGORYX COMMUNITY ASSET — REQUIRED FOR WEEK 3
+
+Place the official Algoryx Community robot GLB file here:
+
+  public/models/algoryx-community-robot.glb
+
+Official asset reference:
+  https://www.algoryx.in/3d-assets/robot/
+
+IMPORTANT:
+- The application expects the file at: /models/algoryx-community-robot.glb
+- Without this file, the 3D section will show a development fallback geometry
+- The fallback does NOT satisfy the Week 3 internship requirement
+- You must download and place the official GLB to complete the requirement
+
+Steps:
+1. Visit https://www.algoryx.in/3d-assets/robot/
+2. Download the GLB file
+3. Rename it to: algoryx-community-robot.glb
+4. Place it in this folder: public/models/
+5. Restart the dev server: npm run dev

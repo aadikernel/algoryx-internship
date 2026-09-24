@@ -1,15 +1,15 @@
-import Navbar from './components/Navbar.jsx'
-import Hero from './components/Hero.jsx'
-import Experience from './components/Experience.jsx'
-import Capabilities from './components/Capabilities.jsx'
-import SystemSection from './components/SystemSection.jsx'
-import ThreeExperience from './components/ThreeExperience.jsx'
-import Contact from './components/Contact.jsx'
-import Footer from './components/Footer.jsx'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import Experience from './components/Experience'
+import Capabilities from './components/Capabilities'
+import SystemSection from './components/SystemSection'
+import ThreeExperience from './components/ThreeExperience'
+import Contact from './components/Contact'
+import Footer from './components/Footer'
 
 export default function App() {
   return (
-    <div className="bg-ink min-h-screen">
+    <>
       <Navbar />
       <main>
         <Hero />
@@ -20,6 +20,6 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
-    </div>
+    </>
   )
 }
